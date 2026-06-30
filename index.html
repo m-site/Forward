@@ -3,102 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedQuiz - محول الروابط السريع</title>
+    <title>تحديث رسائل التليجرام المجمعة - MedQuiz</title>
     <style>
         :root {
             --bg: #0f172a;
             --card-bg: #1e293b;
-            --primary: #38bdf8;
-            --secondary: #8b5cf6;
+            --primary: #10b981; 
+            --secondary: #38bdf8;
             --text: #f8fafc;
-            --text-muted: #94a3b8;
-            --error: #ef4444;
         }
         body {
-            margin: 0; padding: 0;
+            margin: 0; padding: 20px;
             background-color: var(--bg);
             color: var(--text);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            box-sizing: border-box;
         }
         .container {
             background-color: var(--card-bg);
-            padding: 30px;
-            border-radius: 20px;
+            padding: 25px; border-radius: 20px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-            width: 90%;
-            max-width: 450px;
-            text-align: center;
-            border: 1px solid rgba(56, 189, 248, 0.2);
+            width: 100%; max-width: 600px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
         }
-        .icon {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto 20px;
-            font-size: 2rem;
-        }
-        h2 { margin: 0 0 10px; color: var(--primary); }
-        p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 25px; }
+        h2 { text-align: center; color: var(--primary); margin-top: 0; }
+        p { text-align: center; color: #94a3b8; font-size: 0.9rem; line-height: 1.5; margin-bottom: 20px; }
         
-        .input-group { display: flex; flex-direction: column; gap: 15px; }
-        input {
-            width: 100%;
-            padding: 15px;
-            border-radius: 12px;
-            border: 2px solid #334155;
-            background: #0b1120;
-            color: var(--text);
-            font-size: 1rem;
-            outline: none;
-            box-sizing: border-box;
-            transition: 0.3s;
-            direction: ltr; /* لضمان ظهور اللينك بشكل صحيح */
+        /* الصندوق الذكي اللي بيحافظ على التنسيق والاقتباسات */
+        .editor-box {
+            width: 100%; min-height: 250px; max-height: 400px; overflow-y: auto;
+            background: #0b1120; border: 2px solid #334155; border-radius: 12px;
+            padding: 15px; color: #fff; font-size: 1rem; line-height: 1.6;
+            outline: none; transition: 0.3s; box-sizing: border-box;
         }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }
+        .editor-box:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); }
+        .editor-box a { color: var(--secondary); text-decoration: underline; }
         
+        /* ستايل مخصص للحفاظ على شكل الاقتباسات (Quotes) داخل الأداة */
+        .editor-box blockquote {
+            border-right: 4px solid var(--primary);
+            padding-right: 12px;
+            margin: 10px 0;
+            color: #cbd5e1;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px 0 0 4px;
+        }
+        .editor-box pre, .editor-box code {
+            background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; font-family: monospace;
+        }
+        
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
         button {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
+            flex: 1; min-width: 150px; padding: 15px; border: none; border-radius: 12px;
+            font-size: 1.05rem; font-weight: bold; cursor: pointer; transition: 0.3s; color: white;
         }
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(139, 92, 246, 0.4);
-        }
+        .btn-process { background: linear-gradient(135deg, #10b981, #059669); }
+        .btn-process:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); }
         
-        .error-msg {
-            color: var(--error);
-            font-size: 0.85rem;
-            margin-top: 10px;
-            display: none;
-            font-weight: bold;
-        }
+        .btn-copy { background: linear-gradient(135deg, #38bdf8, #2563eb); }
+        .btn-copy:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(56, 189, 248, 0.4); }
+
+        .status { text-align: center; margin-top: 15px; font-weight: bold; font-size: 0.95rem; min-height: 20px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="icon">🔗</div>
-        <h2>أداة تحديث المحاضرات</h2>
-        <p>قم بنسخ الرابط القديم من التليجرام والصقه هنا للوصول إلى المحاضرة على السيرفر الجديد فوراً.</p>
+        <h2>♻️ مصنع رسائل التليجرام</h2>
+        <p>انسخ الرسالة الكاملة من التليجرام والصقها هنا لتغيير الروابط مع الحفاظ التام على الاقتباسات والتنسيق.</p>
         
-        <div class="input-group">
-            <input type="url" id="old-link" placeholder="https://...netlify.app/?id=...">
-            <button onclick="redirectStudent()">افتح المحاضرة الآن 🚀</button>
+        <div id="rich-editor" class="editor-box" contenteditable="true"></div>
+        
+        <div class="btn-group">
+            <button class="btn-process" onclick="processLinks()">1. استبدال الروابط 🔄</button>
+            <button class="btn-copy" onclick="copyRichText()">2. نسخ الرسالة 📋</button>
+        </div>
+
+        <div id="status-msg" class="status"></div>
+    </div>
+
+    <script>
+        function processLinks() {
+            const editor = document.getElementById('rich-editor');
+            const status = document.getElementById('status-msg');
+            
+            if (editor.innerText.trim() === '') {
+                status.style.color = '#ef4444';
+                status.innerText = '⚠️ المربع فارغ، يرجى لصق الرسالة أولاً!';
+                return;
+            }
+
+            // الطريقة الجراحية الجديدة: البحث عن الروابط (a tags) وتعديلها فقط دون المساس بالـ HTML
+            const links = editor.querySelectorAll('a');
+            let matchCount = 0;
+
+            links.forEach(link => {
+                const currentHref = link.getAttribute('href');
+                
+                // فحص إذا كان الرابط يخص Netlify
+                if (currentHref && currentHref.includes('netlify.app')) {
+                    try {
+                        const urlObj = new URL(currentHref);
+                        const queryString = urlObj.search; // يسحب الـ ID
+                        const hashString = urlObj.hash;    // لو في Hash
+                        
+                        // تركيب الرابط الجديد وتحديثه في الكواليس
+                        const newBaseUrl = "https://m-site.github.io/rafik-altib/";
+                        link.setAttribute('href', newBaseUrl + queryString + hashString);
+                        
+                        matchCount++;
+                    } catch (e) {
+                        console.error('رابط غير صالح:', currentHref);
+                    }
+                }
+            });
+
+            if (matchCount > 0) {
+                status.style.color = '#10b981';
+                status.innerText = `✅ روعة! تم اصطياد وتحديث (${matchCount}) رابط مع الحفاظ التام على الاقتباسات!`;
+            } else {
+                status.style.color = '#f59e0b';
+                status.innerText = '⚠️ لم يتم العثور على أي روابط Netlify قديمة.';
+            }
+        }
+
+        function copyRichText() {
+            const editor = document.getElementById('rich-editor');
+            const status = document.getElementById('status-msg');
+
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(editor);
+            selection.removeAllRanges();
+            selection.addRange(range);
+
+            try {
+                document.execCommand('copy');
+                status.style.color = '#38bdf8';
+                status.innerText = '📋 تم النسخ بنجاح! روح للتليجرام واعمل (تعديل > لصق).';
+            } catch (err) {
+                status.style.color = '#ef4444';
+                status.innerText = '❌ فشل النسخ التلقائي، يرجى تظليل النص ونسخه يدوياً.';
+            }
+            
+            selection.removeAllRanges();
+        }
+    </script>
+
+</body>
+</html>
+                if (currentHref && currentHref.includes('netlify.app')) {
+                    try {
+                        const urlObj = new URL(currentHref);
+                        const queryString = urlObj.search; // يسحب الـ ID
+                        const hashString = urlObj.hash;    // لو في Hash
+                        
+                        // تركيب الرابط الجديد وتحديثه في الكواليس
+                        const newBaseUrl = "https://m-site.github.io/rafik-altib/";
+                        link.setAttribute('href', newBaseUrl + queryString + hashString);
+                        
+                        matchCount++;
+                    } catch (e) {
+                        console.error('رابط غير صالح:', currentHref);
+                    }
+                }
+            });
+
+            if (matchCount > 0) {
+                status.style.color = '#10b981';
+                status.innerText = `✅ روعة! تم اصطياد وتحديث (${matchCount}) رابط مع الحفاظ التام على الاقتباسات!`;
+            } else {
+                status.style.color = '#f59e0b';
+                status.innerText = '⚠️ لم يتم العثور على أي روابط Netlify قديمة.';
+            }
+        }
+
+        function copyRichText() {
+            const editor = document.getElementById('rich-editor');
+            const status = document.getElementById('status-msg');
+
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(editor);
+            selection.removeAllRanges();
+            selection.addRange(range);
+
+            try {
+                document.execCommand('copy');
+                status.style.color = '#38bdf8';
+                status.innerText = '📋 تم النسخ بنجاح! روح للتليجرام واعمل (تعديل > لصق).';
+            } catch (err) {
+                status.style.color = '#ef4444';
+                status.innerText = '❌ فشل النسخ التلقائي، يرجى تظليل النص ونسخه يدوياً.';
+            }
+            
+            selection.removeAllRanges();
+        }
+    </script>
+
+</body>
+</html>
             <div id="error-msg" class="error-msg">الرابط غير صحيح أو غير مكتمل!</div>
         </div>
     </div>
